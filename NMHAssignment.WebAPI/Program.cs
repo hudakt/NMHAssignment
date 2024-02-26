@@ -1,6 +1,17 @@
+using NMHAssignment.Infrastructure.Persistance;
+using NMHAssignment.Application;
+using FluentValidation;
+using System.Reflection;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddApplicationServices();
+
+builder.Services.AddPersistance();
+
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
 builder.Services.AddControllers();
 
