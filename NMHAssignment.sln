@@ -9,9 +9,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{20D8A8A8-35F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NMHAssignment.Domain", "NMHAssignment.Domain\NMHAssignment.Domain.csproj", "{63B9300B-8807-4664-8F1D-8A02642E945C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NMHAssignment.Infrastructure", "NMHAssignment.Persistance\NMHAssignment.Infrastructure.csproj", "{F21D5532-DB66-4F35-9636-CCD094B805E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NMHAssignment.Infrastructure", "NMHAssignment.Infrastructure\NMHAssignment.Infrastructure.csproj", "{F21D5532-DB66-4F35-9636-CCD094B805E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NMHAssignment.Application", "NMHAssignment.Application\NMHAssignment.Application.csproj", "{4DC57A34-3E47-4064-AB29-874E8083672D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NMHAssignment.Application", "NMHAssignment.Application\NMHAssignment.Application.csproj", "{4DC57A34-3E47-4064-AB29-874E8083672D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F986A827-5277-4FD7-9121-346DE6C6C365}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yaml = docker-compose.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

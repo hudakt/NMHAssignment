@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NMHAssignment.Application\NMHAssignment.Application.csproj" />
-    <ProjectReference Include="..\NMHAssignment.Persistance\NMHAssignment.Infrastructure.csproj" />
+    <ProjectReference Include="..\NMHAssignment.Infrastructure\NMHAssignment.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

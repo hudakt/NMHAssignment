@@ -3,12 +3,14 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["NMHAssignment.WebAPI/NMHAssignment.WebAPI.csproj", "NMHAssignment.WebAPI/"]
+COPY ["NMHAssignment.Application/NMHAssignment.Application.csproj", "NMHAssignment.Application/"]
+COPY ["NMHAssignment.Infrastructure/NMHAssignment.Infrastructure.csproj", "NMHAssignment.Infrastructure/"]
+COPY ["NMHAssignment.Domain/NMHAssignment.Domain.csproj", "NMHAssignment.Domain/"]
 RUN dotnet restore "./NMHAssignment.WebAPI/NMHAssignment.WebAPI.csproj"
 COPY . .
 WORKDIR "/src/NMHAssignment.WebAPI"
