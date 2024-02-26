@@ -8,3 +8,12 @@ services:
        dockerfile: ./NMHAssignment.WebAPI/Dockerfile
     ports: 
        - "5000:8080"
+  postgres:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: psw
+      POSTGRES_DB: postgresDb

@@ -5,11 +5,9 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddApplicationServices();
 
-builder.Services.AddPersistance();
+builder.Services.AddPersistance(builder.Configuration);
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -17,7 +15,7 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.Services.ApplyMigration();
 
 app.UseAuthorization();
 

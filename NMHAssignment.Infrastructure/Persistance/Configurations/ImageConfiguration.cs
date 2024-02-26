@@ -8,7 +8,11 @@ namespace NMHAssignment.Infrastructure.Persistance.Configurations
     {
         public void Configure(EntityTypeBuilder<Image> builder)
         {
-            builder.HasKey(x => x.Id);
+            builder.HasKey(i => i.Id);
+            builder.HasOne(i => i.Author)
+                   .WithOne(a => a.Image)
+                   .HasForeignKey<Author>(a => a.ImageId)
+                   .IsRequired();
         }
     }
 }

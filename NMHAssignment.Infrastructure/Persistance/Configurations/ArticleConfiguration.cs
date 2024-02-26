@@ -10,6 +10,15 @@ namespace NMHAssignment.Infrastructure.Persistance.Configurations
         {
             builder.HasKey(a => a.Id);
             builder.HasIndex(a => a.Title);
+
+            builder.HasMany(a => a.Author)
+                   .WithMany(a => a.Article)
+                   .UsingEntity(j => j.ToTable("AuthorArticles"));
+
+            builder.HasOne(a => a.Site)
+                   .WithMany(s => s.Article)
+                   .HasForeignKey(a => a.SiteId)
+                   .IsRequired();
         }
     }
 }
