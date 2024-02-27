@@ -30,7 +30,6 @@ namespace NMHAssignment.Infrastructure.Persistance
             catch (Exception ex)
             {
                 logger.LogError(ex, $"Failed to apply migration to database. {ex.Message}");
-                throw;
             }
         }
     }

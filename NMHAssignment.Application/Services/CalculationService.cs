@@ -7,10 +7,12 @@ namespace NMHAssignment.Application.Services
     public class CalculationService : ICalculationService
     {
         private readonly IMemoryCache _memoryCache;
+        private readonly IMessageHub _messageHub;
 
-        public CalculationService(IMemoryCache memoryCache)
+        public CalculationService(IMemoryCache memoryCache, IMessageHub messageHub)
         {
             _memoryCache = memoryCache;
+            _messageHub = messageHub;
         }
 
         public CalculationDTO Calculate(int key, decimal input)
@@ -20,19 +22,23 @@ namespace NMHAssignment.Application.Services
 
             decimal valueToStore = 2;
 
-            if (_memoryCache.TryGetValue(key, out decimal? storedValue))
+            if (_memoryCache.TryGetValue(key, out Calculation? storedValue))
             {
-                valueToStore = ComputeValueToStore(input, storedValue!.Value);
+                valueToStore = storedValue!.IsExpired ? 2 : ComputeValueToStore(input, storedValue!.Value);
             }
 
-            _memoryCache.Set(key, valueToStore, TimeSpan.FromSeconds(15));
+            _memoryCache.Set(key, new Calculation(valueToStore, DateTimeOffset.UtcNow.AddSeconds(15)));
 
-            return new CalculationDTO
+            var result = new CalculationDTO
             {
                 ComputedValue = valueToStore,
                 InputValue = input,
-                PreviousValue = storedValue
+                PreviousValue = storedValue?.Value
             };
+
+            _messageHub.Publish(result, "calculation_queue");
+
+            return result;
         }
 
         private decimal ComputeValueToStore(decimal input, decimal storedValue)
@@ -42,6 +48,20 @@ namespace NMHAssignment.Application.Services
             var resultSqrt = Math.Pow(logResult, (double)1 / 3);
 
             return Convert.ToDecimal(resultSqrt);
+        }
+
+        private class Calculation
+        {
+            public decimal Value { get; }
+            public bool IsExpired => expiration.UtcDateTime < DateTime.UtcNow;
+
+            private DateTimeOffset expiration;
+
+            public Calculation(decimal value, DateTimeOffset expiresAt)
+            {
+                Value = value;
+                expiration = expiresAt;
+            }
         }
     }
 }
