@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using NMHAssignment.Application.Common.Interfaces;
 using NMHAssignment.Application.DTOs;
 
@@ -8,12 +9,14 @@ namespace NMHAssignment.Application.Services
     {
         private readonly IMemoryCache _memoryCache;
         private readonly IMessageHub _messageHub;
+        private readonly ILogger<CalculationService> _logger;
         private readonly SemaphoreSlim _semaphore;
 
-        public CalculationService(IMemoryCache memoryCache, IMessageHub messageHub)
+        public CalculationService(IMemoryCache memoryCache, IMessageHub messageHub, ILogger<CalculationService> logger)
         {
             _memoryCache = memoryCache;
             _messageHub = messageHub;
+            _logger = logger;
             _semaphore = new SemaphoreSlim(1, 1);
         }
 
@@ -23,7 +26,7 @@ namespace NMHAssignment.Application.Services
             if (input < 0) throw new ArgumentException($"{nameof(input)} argument has to be positive real number.");
 
             decimal valueToStore = 2;
-            Calculation? storedValue;
+            Calculation? storedValue = null;
 
             await _semaphore.WaitAsync();
             try
@@ -34,6 +37,10 @@ namespace NMHAssignment.Application.Services
                 }
 
                 _memoryCache.Set(key, new Calculation(valueToStore, DateTimeOffset.UtcNow.AddSeconds(15)));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while calculating input.");
             }
             finally
             {
