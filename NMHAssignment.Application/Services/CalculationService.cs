@@ -8,26 +8,37 @@ namespace NMHAssignment.Application.Services
     {
         private readonly IMemoryCache _memoryCache;
         private readonly IMessageHub _messageHub;
+        private readonly SemaphoreSlim _semaphore;
 
         public CalculationService(IMemoryCache memoryCache, IMessageHub messageHub)
         {
             _memoryCache = memoryCache;
             _messageHub = messageHub;
+            _semaphore = new SemaphoreSlim(1, 1);
         }
 
-        public CalculationDTO Calculate(int key, decimal input)
+        public async Task<CalculationDTO> CalculateAsync(int key, decimal input)
         {
             if (key < 0) throw new ArgumentException($"{nameof(key)} argument has to be positive whole number.");
             if (input < 0) throw new ArgumentException($"{nameof(input)} argument has to be positive real number.");
 
             decimal valueToStore = 2;
+            Calculation? storedValue;
 
-            if (_memoryCache.TryGetValue(key, out Calculation? storedValue))
+            await _semaphore.WaitAsync();
+            try
             {
-                valueToStore = storedValue!.IsExpired ? 2 : ComputeValueToStore(input, storedValue!.Value);
-            }
+                if (_memoryCache.TryGetValue(key, out storedValue))
+                {
+                    valueToStore = storedValue!.IsExpired ? 2 : ComputeValueToStore(input, storedValue!.Value);
+                }
 
-            _memoryCache.Set(key, new Calculation(valueToStore, DateTimeOffset.UtcNow.AddSeconds(15)));
+                _memoryCache.Set(key, new Calculation(valueToStore, DateTimeOffset.UtcNow.AddSeconds(15)));
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
 
             var result = new CalculationDTO
             {

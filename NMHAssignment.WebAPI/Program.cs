@@ -4,6 +4,7 @@ using FluentValidation;
 using System.Reflection;
 using NMHAssignment.Infrastructure.Messaging.Configuration;
 using NMHAssignment.Infrastructure.Messaging;
+using NMHAssignment.WebAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ services.Configure<MessageHubOptions>(builder.Configuration.GetSection("MessageH
 services.AddApplicationServices();
 services.AddPersistance(builder.Configuration);
 services.AddMessagingServices();
+services.AddHostedService<MessageHandleService>();
 services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 services.AddControllers();
 
@@ -21,7 +23,7 @@ var app = builder.Build();
 
 app.Services.ConnectToMessageHub();
 
-//app.Services.ApplyMigration();
+app.Services.ApplyMigration();
 
 app.UseAuthorization();
 

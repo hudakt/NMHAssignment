@@ -3,6 +3,8 @@ using Microsoft.Extensions.Options;
 using NMHAssignment.Application.Common.Interfaces;
 using NMHAssignment.Infrastructure.Messaging.Configuration;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using System.Text;
 using System.Text.Json;
 
 namespace NMHAssignment.Infrastructure.Messaging
@@ -10,7 +12,9 @@ namespace NMHAssignment.Infrastructure.Messaging
     internal class RabbitMQHub : IDisposable, IMessageHub
     {
         private IConnection? _connection;
-        private IModel? _channel;
+        private IModel? _publishChannel;
+        private IModel? _consumerChannel;
+        private EventingBasicConsumer _consumer;
 
         private readonly MessageHubOptions _options;
         private readonly ILogger<RabbitMQHub> _logger;
@@ -36,7 +40,9 @@ namespace NMHAssignment.Infrastructure.Messaging
                 try
                 {
                     _connection = factory.CreateConnection();
-                    _channel = _connection.CreateModel();
+                    _publishChannel = _connection.CreateModel();
+                    _consumerChannel = _connection.CreateModel();
+                    _consumer = new EventingBasicConsumer(_consumerChannel);
                     _logger.LogInformation("Successfully connected to RabbitMQ broker.");
                     return;
                 }
@@ -59,23 +65,40 @@ namespace NMHAssignment.Infrastructure.Messaging
         {
             var rawData = JsonSerializer.SerializeToUtf8Bytes(data);
 
-            _channel.QueueDeclare(queueName);
+            _publishChannel.QueueDeclare(queueName);
 
-            lock ( _channel )
+            lock (_publishChannel!)
             {
-                var props = _channel.CreateBasicProperties();
+                var props = _publishChannel.CreateBasicProperties();
 
-                _channel.BasicPublish("", queueName, props, rawData);
+                _publishChannel.BasicPublish("", queueName, props, rawData);
             }
+        }
+
+        public string Subscribe<T>(string queueName, Action<T> handleMessage)
+        {
+            _consumerChannel.QueueDeclare(queueName);
+
+            _consumer.Received += (ch, ea) =>
+            {
+                var rawMessage = Encoding.UTF8.GetString(ea.Body.ToArray());
+                var message = JsonSerializer.Deserialize<T>(rawMessage);
+                if (message != null)
+                {
+                    handleMessage(message);
+                }
+            };
+
+            return _consumerChannel!.BasicConsume(queueName, false, _consumer);
         }
 
         public void Dispose()
         {
-            using (_connection)
-            {
-                _connection?.Close();
-                _channel?.Dispose();
-            }
+            _connection?.Close();
+            _publishChannel?.Close();
+
+            _connection?.Dispose();
+            _publishChannel?.Dispose();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace NMHAssignment.WebAPI.Controllers
             if (!validation.IsValid)
                 return BadRequest(validation.Errors);
 
-            var result = _calculationService.Calculate(request.Key, request.Body.Input!.Value);
+            var result = await _calculationService.CalculateAsync(request.Key, request.Body.Input!.Value);
 
             return Ok(CalculationResponse.FromDto(result));
         }

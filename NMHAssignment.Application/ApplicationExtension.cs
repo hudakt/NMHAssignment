@@ -7,7 +7,7 @@ namespace NMHAssignment.Application
     public static class ApplicationExtension
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services) =>
-            services.AddScoped<ICalculationService, CalculationService>()
+            services.AddSingleton<ICalculationService, CalculationService>()
                     .AddMemoryCache();
     }
 }
